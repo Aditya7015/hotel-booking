@@ -2,6 +2,8 @@ import transporter from "../configs/nodemailer.js";
 import Booking from "../models/Booking.js";
 import Hotel from "../models/Hotel.js";
 import Room from "../models/Room.js";
+import Stripe from "stripe";
+
 
 // Function to Check Availability of Room
 const checkAvailability = async ({ checkInDate, checkOutDate, room }) => {
@@ -132,3 +134,90 @@ export const getHotelBookings = async (req, res) => {
     res.json({ success: false, message: "Failed to fetch bookings" });
   }
 };
+
+
+
+
+export const stripePayment = async (req, res) => {
+  try {
+    const { bookingId } = req.body;
+
+    const booking = await Booking.findById(bookingId);
+    const roomData = await Room.findById(booking.room).populate("hotel");
+    const totalPrice = booking.totalPrice;
+
+    const origin = req.headers.origin || "http://localhost:5173"; // fallback for dev
+    const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+    // Create Checkout Session
+    const session = await stripeInstance.checkout.sessions.create({
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: { name: roomData.hotel.name },
+            unit_amount: totalPrice * 100,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      success_url: `${origin}/loader/my-bookings`,
+      cancel_url: `${origin}/my-bookings`,
+      metadata: { bookingId },
+    });
+
+    res.json({ success: true, url: session.url });
+  } catch (error) {
+    console.error("Stripe Error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+// export const stripePayment = async (req, res) => {
+//   try {
+//     const { bookingId } = req.body;
+
+//     console.log("🎟️ stripePayment called with bookingId:", bookingId);
+
+//     const booking = await Booking.findById(bookingId);
+//     if (!booking) {
+//       console.error("❌ Booking not found in DB for ID:", bookingId);
+//       return res.status(404).json({ success: false, message: "Booking not found" });
+//     }
+
+//     const roomData = await Room.findById(booking.room).populate("hotel");
+//     console.log("🏨 Room + Hotel fetched:", roomData?.hotel?.name);
+
+//     const totalPrice = booking.totalPrice;
+//     console.log("💵 Total Price for booking:", totalPrice);
+
+//     const origin = req.headers.origin || "http://localhost:5173"; 
+//     const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+//     const session = await stripeInstance.checkout.sessions.create({
+//       line_items: [
+//         {
+//           price_data: {
+//             currency: "usd",
+//             product_data: { name: roomData.hotel.name },
+//             unit_amount: totalPrice * 100,
+//           },
+//           quantity: 1,
+//         },
+//       ],
+//       mode: "payment",
+//       success_url: `${origin}/loader/my-bookings`,
+//       cancel_url: `${origin}/my-bookings`,
+//       metadata: { bookingId },
+//     });
+
+//     console.log("✅ Stripe checkout session created:", session.id, "for booking:", bookingId);
+
+//     res.json({ success: true, url: session.url });
+//   } catch (error) {
+//     console.error("🔥 Stripe Error in stripePayment:", error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
