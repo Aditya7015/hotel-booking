@@ -223,6 +223,117 @@ export const getHotelBookings = async (req, res) => {
 // // };
 
 
+// export const stripePayment = async (req, res) => {
+//   try {
+//     const { bookingId } = req.body;
+//     console.log("🎟️ stripePayment called with bookingId:", bookingId);
+
+//     const booking = await Booking.findById(bookingId);
+//     if (!booking) {
+//       console.error("❌ Booking not found in DB for ID:", bookingId);
+//       return res.status(404).json({ success: false, message: "Booking not found" });
+//     }
+//     console.log("✅ Booking found:", booking._id, "Total Price:", booking.totalPrice);
+
+//     const roomData = await Room.findById(booking.room).populate("hotel");
+//     console.log("🏨 Room + Hotel fetched:", roomData?.hotel?.name);
+
+//     const totalPrice = booking.totalPrice;
+//     console.log("💵 Total Price for booking:", totalPrice);
+
+//     const origin = req.headers.origin || "http://localhost:5173";
+//     console.log("🌍 Origin for redirect URLs:", origin);
+
+//     const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+//     // Create Checkout Session
+//     const session = await stripeInstance.checkout.sessions.create({
+//       line_items: [
+//         {
+//           price_data: {
+//             currency: "usd",
+//             product_data: { name: roomData.hotel.name },
+//             unit_amount: totalPrice * 100,
+//           },
+//           quantity: 1,
+//         },
+//       ],
+//       mode: "payment",
+//       success_url: `${origin}/loader/my-bookings`,
+//       cancel_url: `${origin}/my-bookings`,
+//       metadata: { bookingId }, // 👈 very important
+//     });
+
+//     console.log("✅ Stripe checkout session created:");
+//     console.log("   - Session ID:", session.id);
+//     console.log("   - URL:", session.url);
+//     console.log("   - Metadata:", session.metadata);
+
+//     res.json({ success: true, url: session.url });
+//   } catch (error) {
+//     console.error("🔥 Stripe Error in stripePayment:", error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+
+// export const stripePayment = async (req, res) => {
+//   try {
+//     const { bookingId } = req.body;
+//     console.log("🎟️ stripePayment called with bookingId:", bookingId);
+
+//     const booking = await Booking.findById(bookingId);
+//     if (!booking) {
+//       console.error("❌ Booking not found in DB for ID:", bookingId);
+//       return res.status(404).json({ success: false, message: "Booking not found" });
+//     }
+//     console.log("✅ Booking found:", booking._id, "Total Price:", booking.totalPrice);
+
+//     const roomData = await Room.findById(booking.room).populate("hotel");
+//     console.log("🏨 Room + Hotel fetched:", roomData?.hotel?.name);
+
+//     const totalPrice = booking.totalPrice;
+//     console.log("💵 Total Price for booking:", totalPrice);
+
+//     const origin = req.headers.origin || "http://localhost:5173";
+//     console.log("🌍 Origin for redirect URLs:", origin);
+
+//     const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+//     // Create Checkout Session
+//     const session = await stripeInstance.checkout.sessions.create({
+//       line_items: [
+//         {
+//           price_data: {
+//             currency: "usd",
+//             product_data: { name: roomData.hotel.name },
+//             unit_amount: totalPrice * 100,
+//           },
+//           quantity: 1,
+//         },
+//       ],
+//       mode: "payment",
+//       success_url: `${origin}/loader/my-bookings`,
+//       cancel_url: `${origin}/my-bookings`,
+//       metadata: { bookingId }, // ✅ attach to session
+//       payment_intent_data: {
+//         metadata: { bookingId }, // ✅ attach to Payment Intent
+//       },
+//     });
+
+//     console.log("✅ Stripe checkout session created:");
+//     console.log("   - Session ID:", session.id);
+//     console.log("   - URL:", session.url);
+//     console.log("   - Metadata:", session.metadata);
+
+//     res.json({ success: true, url: session.url });
+//   } catch (error) {
+//     console.error("🔥 Stripe Error in stripePayment:", error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+
 export const stripePayment = async (req, res) => {
   try {
     const { bookingId } = req.body;
@@ -261,7 +372,10 @@ export const stripePayment = async (req, res) => {
       mode: "payment",
       success_url: `${origin}/loader/my-bookings`,
       cancel_url: `${origin}/my-bookings`,
-      metadata: { bookingId }, // 👈 very important
+      metadata: { bookingId }, // ✅ attach to session
+      payment_intent_data: {
+        metadata: { bookingId }, // ✅ attach to Payment Intent
+      },
     });
 
     console.log("✅ Stripe checkout session created:");
