@@ -1,115 +1,170 @@
-// import Stripe from 'stripe';
-// import Booking from '../models/Booking.js';
-
-// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-// export const stripeWebhooks = async (req, res) => {
-//   const sig = req.headers['stripe-signature'];
-
-//   let event;
-//   try {
-//     event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-//   } catch (err) {
-//     console.error('Webhook signature verification failed:', err.message);
-//     return res.status(400).send(`Webhook Error: ${err.message}`);
-//   }
-
-//   try {
-//     switch (event.type) {
-//       case 'checkout.session.completed': {
-//         const session = event.data.object;
-
-//         // bookingId from metadata
-//         const bookingId = session.metadata?.bookingId;
-//         if (!bookingId) {
-//           console.warn('checkout.session.completed received but no bookingId in metadata');
-//           break;
-//         }
-
-//         // Update booking as paid
-//         await Booking.findByIdAndUpdate(
-//           bookingId,
-//           { isPaid: true, paymentMethod: 'Stripe', status: 'confirmed' },
-//           { new: true }
-//         );
-
-//         console.log(`Booking ${bookingId} marked as paid.`);
-//         break;
-//       }
-
-//       default:
-//         console.log(`Unhandled event type: ${event.type}`);
-//     }
-
-//     res.json({ received: true });
-//   } catch (error) {
-//     console.error('Error handling webhook:', error);
-//     res.status(500).send('Webhook handler failed');
-//   }
-// };
-
-
-// // import Stripe from "stripe";
-// // import Booking from "../models/Booking.js";
+// // import Stripe from 'stripe';
+// // import Booking from '../models/Booking.js';
 
 // // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // // export const stripeWebhooks = async (req, res) => {
-// //   const sig = req.headers["stripe-signature"];
+// //   const sig = req.headers['stripe-signature'];
+
+// //   let event;
+// //   try {
+// //     event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+// //   } catch (err) {
+// //     console.error('Webhook signature verification failed:', err.message);
+// //     return res.status(400).send(`Webhook Error: ${err.message}`);
+// //   }
 
 // //   try {
-// //     // Construct event with raw body
-// //     const event = stripe.webhooks.constructEvent(
-// //       req.body,
-// //       sig,
-// //       process.env.STRIPE_WEBHOOK_SECRET
-// //     );
+// //     switch (event.type) {
+// //       case 'checkout.session.completed': {
+// //         const session = event.data.object;
 
-// //     console.log("🔔 Stripe event received:", event.type);
+// //         // bookingId from metadata
+// //         const bookingId = session.metadata?.bookingId;
+// //         if (!bookingId) {
+// //           console.warn('checkout.session.completed received but no bookingId in metadata');
+// //           break;
+// //         }
 
-// //     // Only handle checkout.session.completed
-// //     if (event.type === "checkout.session.completed") {
-// //       const session = event.data.object;
-// //       console.log("📌 Session object:", session);
+// //         // Update booking as paid
+// //         await Booking.findByIdAndUpdate(
+// //           bookingId,
+// //           { isPaid: true, paymentMethod: 'Stripe', status: 'confirmed' },
+// //           { new: true }
+// //         );
 
-// //       const bookingId = session.metadata?.bookingId;
-// //       if (!bookingId) {
-// //         console.error("❌ No bookingId found in metadata");
-// //         return res.status(400).send("No bookingId in metadata");
+// //         console.log(`Booking ${bookingId} marked as paid.`);
+// //         break;
 // //       }
 
-// //       // Update booking in MongoDB
-// //       const updatedBooking = await Booking.findByIdAndUpdate(
-// //         bookingId,
-// //         {
-// //           paymentStatus: "paid",
-// //           paymentIntent: session.payment_intent,
-// //         },
-// //         { new: true }
-// //       );
-
-// //       if (!updatedBooking) {
-// //         console.error("❌ Booking not found:", bookingId);
-// //       } else {
-// //         console.log("✅ Booking updated:", updatedBooking);
-// //       }
+// //       default:
+// //         console.log(`Unhandled event type: ${event.type}`);
 // //     }
 
-// //     res.sendStatus(200);
-// //   } catch (err) {
-// //     console.error("❌ Stripe webhook error:", err.message);
-// //     return res.status(400).send(`Webhook Error: ${err.message}`);
+// //     res.json({ received: true });
+// //   } catch (error) {
+// //     console.error('Error handling webhook:', error);
+// //     res.status(500).send('Webhook handler failed');
 // //   }
 // // };
 
 
+// // // import Stripe from "stripe";
+// // // import Booking from "../models/Booking.js";
+
+// // // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// // // export const stripeWebhooks = async (req, res) => {
+// // //   const sig = req.headers["stripe-signature"];
+
+// // //   try {
+// // //     // Construct event with raw body
+// // //     const event = stripe.webhooks.constructEvent(
+// // //       req.body,
+// // //       sig,
+// // //       process.env.STRIPE_WEBHOOK_SECRET
+// // //     );
+
+// // //     console.log("🔔 Stripe event received:", event.type);
+
+// // //     // Only handle checkout.session.completed
+// // //     if (event.type === "checkout.session.completed") {
+// // //       const session = event.data.object;
+// // //       console.log("📌 Session object:", session);
+
+// // //       const bookingId = session.metadata?.bookingId;
+// // //       if (!bookingId) {
+// // //         console.error("❌ No bookingId found in metadata");
+// // //         return res.status(400).send("No bookingId in metadata");
+// // //       }
+
+// // //       // Update booking in MongoDB
+// // //       const updatedBooking = await Booking.findByIdAndUpdate(
+// // //         bookingId,
+// // //         {
+// // //           paymentStatus: "paid",
+// // //           paymentIntent: session.payment_intent,
+// // //         },
+// // //         { new: true }
+// // //       );
+
+// // //       if (!updatedBooking) {
+// // //         console.error("❌ Booking not found:", bookingId);
+// // //       } else {
+// // //         console.log("✅ Booking updated:", updatedBooking);
+// // //       }
+// // //     }
+
+// // //     res.sendStatus(200);
+// // //   } catch (err) {
+// // //     console.error("❌ Stripe webhook error:", err.message);
+// // //     return res.status(400).send(`Webhook Error: ${err.message}`);
+// // //   }
+// // // };
+
+
+// import Stripe from "stripe";
+// import Booking from "../models/Booking.js";
+
+// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// export const stripeWebhooks = async (req, res) => {
+//   const sig = req.headers["stripe-signature"];
+
+//   let event;
+//   try {
+//     event = stripe.webhooks.constructEvent(
+//       req.body,
+//       sig,
+//       process.env.STRIPE_WEBHOOK_SECRET
+//     );
+//   } catch (err) {
+//     console.error("❌ Webhook signature verification failed:", err.message);
+//     return res.status(400).send(`Webhook Error: ${err.message}`);
+//   }
+
+//   if (event.type === "checkout.session.completed") {
+//     const session = event.data.object;
+
+//     try {
+//       const bookingId = session.metadata?.bookingId;
+//       if (!bookingId) {
+//         console.error("❌ No bookingId in metadata");
+//         return res.status(400).send("No bookingId in metadata");
+//       }
+
+//       const updatedBooking = await Booking.findByIdAndUpdate(
+//         bookingId,
+//         {
+//           isPaid: true,                 // ✅ matches your schema
+//           status: "confirmed",          // ✅ matches enum
+//           paymentMethod: "Stripe",      // ✅ matches schema
+//         },
+//         { new: true }
+//       );
+
+//       if (!updatedBooking) {
+//         console.error("❌ Booking not found:", bookingId);
+//       } else {
+//         console.log("✅ Booking updated:", updatedBooking._id);
+//       }
+//     } catch (err) {
+//       console.error("🔥 Error updating booking:", err.message);
+//     }
+//   }
+
+//   res.sendStatus(200);
+// };
 import Stripe from "stripe";
 import Booking from "../models/Booking.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const stripeWebhooks = async (req, res) => {
+  console.log("📩 Stripe webhook called");
+
   const sig = req.headers["stripe-signature"];
+  console.log("📌 Stripe signature header:", sig);
 
   let event;
   try {
@@ -118,39 +173,50 @@ export const stripeWebhooks = async (req, res) => {
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
+    console.log("✅ Stripe event constructed:", event.type);
   } catch (err) {
     console.error("❌ Webhook signature verification failed:", err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
+  // Handle only checkout.session.completed
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
 
+    console.log("💳 Checkout session completed!");
+    console.log("📌 Session object:", session);
+    console.log("📌 Metadata:", session.metadata);
+
     try {
       const bookingId = session.metadata?.bookingId;
+
       if (!bookingId) {
-        console.error("❌ No bookingId in metadata");
+        console.error("❌ No bookingId found in session.metadata");
         return res.status(400).send("No bookingId in metadata");
       }
+
+      console.log("🔑 BookingId found:", bookingId);
 
       const updatedBooking = await Booking.findByIdAndUpdate(
         bookingId,
         {
-          isPaid: true,                 // ✅ matches your schema
-          status: "confirmed",          // ✅ matches enum
-          paymentMethod: "Stripe",      // ✅ matches schema
+          isPaid: true, // ✅ matches schema
+          status: "confirmed",
+          paymentMethod: "Stripe",
         },
         { new: true }
       );
 
       if (!updatedBooking) {
-        console.error("❌ Booking not found:", bookingId);
+        console.error("❌ Booking not found in DB:", bookingId);
       } else {
-        console.log("✅ Booking updated:", updatedBooking._id);
+        console.log("✅ Booking updated successfully:", updatedBooking);
       }
     } catch (err) {
-      console.error("🔥 Error updating booking:", err.message);
+      console.error("🔥 Error updating booking:", err);
     }
+  } else {
+    console.log("⚠️ Unhandled event type:", event.type);
   }
 
   res.sendStatus(200);
