@@ -101,6 +101,8 @@
 // //     return res.status(400).send(`Webhook Error: ${err.message}`);
 // //   }
 // // };
+
+
 import Stripe from "stripe";
 import Booking from "../models/Booking.js";
 
@@ -111,31 +113,32 @@ export const stripeWebhooks = async (req, res) => {
 
   let event;
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
   } catch (err) {
     console.error("❌ Webhook signature verification failed:", err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  try {
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object;
-      console.log("📌 Session received in webhook:", session);
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object;
 
+    try {
       const bookingId = session.metadata?.bookingId;
-      console.log("📌 bookingId from metadata:", bookingId);
-
       if (!bookingId) {
-        console.warn("⚠️ No bookingId found in session metadata");
+        console.error("❌ No bookingId in metadata");
         return res.status(400).send("No bookingId in metadata");
       }
 
       const updatedBooking = await Booking.findByIdAndUpdate(
         bookingId,
         {
-          paymentStatus: "paid",   // 👈 use consistent field
-          paymentIntent: session.payment_intent,
-          status: "confirmed",
+          isPaid: true,                 // ✅ matches your schema
+          status: "confirmed",          // ✅ matches enum
+          paymentMethod: "Stripe",      // ✅ matches schema
         },
         { new: true }
       );
@@ -143,15 +146,12 @@ export const stripeWebhooks = async (req, res) => {
       if (!updatedBooking) {
         console.error("❌ Booking not found:", bookingId);
       } else {
-        console.log("✅ Booking updated:", updatedBooking);
+        console.log("✅ Booking updated:", updatedBooking._id);
       }
-    } else {
-      console.log(`ℹ️ Unhandled event type: ${event.type}`);
+    } catch (err) {
+      console.error("🔥 Error updating booking:", err.message);
     }
-
-    res.json({ received: true });
-  } catch (error) {
-    console.error("🔥 Error handling webhook:", error);
-    res.status(500).send("Webhook handler failed");
   }
+
+  res.sendStatus(200);
 };
